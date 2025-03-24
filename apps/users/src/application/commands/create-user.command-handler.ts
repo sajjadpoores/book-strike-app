@@ -4,6 +4,7 @@ import { UserRepository } from '../ports/user.repository';
 import { User } from '../../domain/user';
 import { CreateUserCommand } from './create-user.command';
 import { UserCreatedEvent } from '../../domain/events/user-created.event';
+import * as bcrypt from 'bcrypt';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserCommandHandler
@@ -21,11 +22,13 @@ export class CreateUserCommandHandler
       `processing "CreateUserCommand": ${JSON.stringify(command)}`,
     );
 
+    const password = await bcrypt.hash(command.password, 10);
+
     const user = User.create(
       command.name,
       command.email,
       command.phoneNumber,
-      command.password,
+      password,
     );
 
     const newUser = await this.userRepository.create(user);
